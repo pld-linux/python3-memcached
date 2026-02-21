@@ -1,26 +1,46 @@
+#
+# Conditional build:
+%bcond_with	tests	# unit tests (not in sdist)
+
 %define		module	memcached
-Summary:	memcached python client
-Summary(pl.UTF-8):	Pythonowy klient memcached
+Summary:	Pure Python memcached client
+Summary(pl.UTF-8):	Klient memcached w czystym Pythonie
 Name:		python-%{module}
-Version:	1.48
-Release:	3
-License:	GPL
+# keep 1.59 here for python2 support
+Version:	1.59
+Release:	1
+# see memcache.py /__license__
+License:	PSF
 Group:		Libraries/Python
-Source0:	ftp://ftp.tummy.com/pub/python-%{module}/%{name}-%{version}.tar.gz
-# Source0-md5:	58f8c328304df6aca1f8b60170e98932
-URL:		http://www.tummy.com/Community/software/python-memcached/
+#Source0Download: https://pypi.org/simple/python-memcached/
+Source0:	https://files.pythonhosted.org/packages/source/p/python-memcached/%{name}-%{version}.tar.gz
+# Source0-md5:	fe5a7c66da01b0c4f5223a4db8cb8659
+URL:		https://pypi.org/project/python-memcached/
+BuildRequires:	python-modules >= 1:2.7
 BuildRequires:	python-setuptools
+%if %{with tests}
+BuildRequires:	python-coverage
+BuildRequires:	python-hacking
+BuildRequires:	python-mock
+BuildRequires:	python-nose
+BuildRequires:	python-six >= 1.4.0
+%endif
 BuildRequires:	rpm-pythonprov
-BuildRequires:	rpmbuild(macros) >= 1.710
-Requires:	python-modules
+BuildRequires:	rpmbuild(macros) >= 1.714
+Requires:	python-modules >= 1:2.7
 BuildArch:	noarch
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
-memcached python client.
+This software is a 100% Python interface to the memcached memory cache
+daemon. It is the client side software which allows storing values in
+one or more, possibly remote, memcached servers.
 
 %description -l pl.UTF-8
-Pythonowy klient memcached.
+Ten pakiet to napisany w 100% w Pythonie interfejs do demona pamięci
+podręcznej memcached. Jest to biblioteka strony klienckiej, która
+pozwala przechowywać wartości w jednym lub większej liczbie, także
+zdalnych, serwerów memcached.
 
 %prep
 %setup -q
@@ -28,10 +48,14 @@ Pythonowy klient memcached.
 %build
 %py_build
 
+%if %{with tests}
+nosetests-%{py_ver}
+%endif
+
 %install
 rm -rf $RPM_BUILD_ROOT
-%py_install \
-	--root $RPM_BUILD_ROOT
+
+%py_install
 
 %py_postclean
 
@@ -40,5 +64,6 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(644,root,root,755)
-%{py_sitescriptdir}/*.py[co]
-%{py_sitescriptdir}/python_memcached-*.egg-info
+%doc ChangeLog README.md
+%{py_sitescriptdir}/memcache.py[co]
+%{py_sitescriptdir}/python_memcached-%{version}-py*.egg-info
