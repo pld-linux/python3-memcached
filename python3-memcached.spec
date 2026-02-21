@@ -1,33 +1,27 @@
 #
 # Conditional build:
-%bcond_with	tests	# unit tests (not in sdist)
+%bcond_with	tests	# unit tests (tests/utils.py missing in sdist)
 
 %define		module	memcached
 Summary:	Pure Python memcached client
 Summary(pl.UTF-8):	Klient memcached w czystym Pythonie
-Name:		python-%{module}
-# keep 1.59 here for python2 support
-Version:	1.59
+Name:		python3-%{module}
+Version:	1.62
 Release:	1
-# see memcache.py /__license__
-License:	PSF
+License:	PSF v2
 Group:		Libraries/Python
 #Source0Download: https://pypi.org/simple/python-memcached/
-Source0:	https://files.pythonhosted.org/packages/source/p/python-memcached/%{name}-%{version}.tar.gz
-# Source0-md5:	fe5a7c66da01b0c4f5223a4db8cb8659
+Source0:	https://files.pythonhosted.org/packages/source/p/python-memcached/python-memcached-%{version}.tar.gz
+# Source0-md5:	390ddff32f7ee1ae7166b3486c44de9f
 URL:		https://pypi.org/project/python-memcached/
-BuildRequires:	python-modules >= 1:2.7
-BuildRequires:	python-setuptools
+BuildRequires:	python3-modules >= 1:3.6
+BuildRequires:	python3-setuptools
 %if %{with tests}
-BuildRequires:	python-coverage
-BuildRequires:	python-hacking
-BuildRequires:	python-mock
-BuildRequires:	python-nose
-BuildRequires:	python-six >= 1.4.0
+BuildRequires:	python3-pynose
 %endif
 BuildRequires:	rpm-pythonprov
 BuildRequires:	rpmbuild(macros) >= 1.714
-Requires:	python-modules >= 1:2.7
+Requires:	python3-modules >= 1:3.6
 BuildArch:	noarch
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
@@ -43,27 +37,26 @@ pozwala przechowywać wartości w jednym lub większej liczbie, także
 zdalnych, serwerów memcached.
 
 %prep
-%setup -q
+%setup -q -n python-memcached-%{version}
 
 %build
-%py_build
+%py3_build
 
 %if %{with tests}
-nosetests-%{py_ver}
+nosetests-%{py3_ver} tests
 %endif
 
 %install
 rm -rf $RPM_BUILD_ROOT
 
-%py_install
-
-%py_postclean
+%py3_install
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(644,root,root,755)
-%doc ChangeLog README.md
-%{py_sitescriptdir}/memcache.py[co]
-%{py_sitescriptdir}/python_memcached-%{version}-py*.egg-info
+%doc ChangeLog README.md SECURITY.md
+%{py3_sitescriptdir}/memcache.py
+%{py3_sitescriptdir}/__pycache__/memcache.cpython-*.py[co]
+%{py3_sitescriptdir}/python_memcached-%{version}-py*.egg-info
